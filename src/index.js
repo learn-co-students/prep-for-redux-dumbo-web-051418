@@ -3,17 +3,22 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import logo from './logo.svg';
 import './App.css';
+import { Provider, connect} from 'react-redux'
+import { createStore }from 'redux'
+import manageCounter from './reducers/manageCounter.js'
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <Header />
-        <Counter />
-      </div>
-    );
-  }
-}
+const store = createStore(manageCounter)
+//
+// class App extends Component {
+//   render() {
+//     return (
+//       <div className="App">
+//         <Header />
+//         <Counter />
+//       </div>
+//     );
+//   }
+// }
 
 class Header extends Component {
   render() {
@@ -26,33 +31,55 @@ class Header extends Component {
   }
 }
 
-class Counter extends Component {
-  state = { count: 0 };
+const mapStateToProps = (state) => {
+  return {
+    count: state.count
+  }
+}
 
-  increment = () => {
-    this.setState(prevState => ({ count: prevState.count + 1 }));
-  };
+const mapDispatchToProps = (dispatch) => {
+  return {
+    increment: () => dispatch({type: 'INCREASE_COUNT'}),
+    decrement: () => dispatch({type: 'DECREASE_COUNT'})
+  }
+}
 
-  decrement = () => {
-    this.setState(prevState => ({ count: prevState.count - 1 }));
-  };
+const Counter = connect(mapStateToProps, mapDispatchToProps)(class extends Component {
 
   renderDescription = () => {
-    const remainder = this.state.count % 5;
+    const remainder = this.props.count % 5;
     const upToNext = 5 - remainder;
-    return `The current count is less than ${this.state.count + upToNext}`;
+    return `The current count is less than ${this.props.count + upToNext}`;
   };
 
   render() {
     return (
       <div className="Counter">
-        <h1>{this.state.count}</h1>
-        <button onClick={this.decrement}> - </button>
-        <button onClick={this.increment}> + </button>
+        <h1>{this.props.count}</h1>
+        <button onClick={this.props.decrement}> - </button>
+        <button onClick={this.props.increment}> + </button>
         <h3>{this.renderDescription()}</h3>
       </div>
     );
   }
 }
+)
 
-ReactDOM.render(<App />, document.getElementById('root'));
+
+class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <Header />
+        <Counter />
+      </div>
+    );
+  }
+}
+
+
+
+
+//takes in reducer
+
+ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('root'));
